@@ -4,12 +4,10 @@ namespace GrossAPI.Models.DTOModel
 {
     public class PostDTO
     {
-        [Required]
-        public string Description { get; set; }
-        [Required]
+        public string? Description { get; set; }
         [MaxLength(100)]
-        public string ShortDescription { get; set; }
-        [Required]
-        public string Header { get; set; }
+        public string? ShortDescription { get; set; }
+        public string? Header { get; set; }
+
     }
 }

@@ -1,11 +1,17 @@
-﻿using GrossAPI.DataAccess;
+﻿using Azure;
+using GrossAPI.DataAccess;
 using GrossAPI.Models;
 using GrossAPI.Models.DTOModel;
 using GrossAPI.Models.RequestModel;
 using GrossAPI.Models.ViewModel;
 using GrossAPI.Utils;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Reflection;
+using System.Text.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace GrossAPI.Controllers
 {
@@ -22,33 +28,44 @@ namespace GrossAPI.Controllers
            _webHostEnvironment= webHostEnvironment;
         }
 
-        [HttpGet]
+        [HttpGet("posts", Name = "GetPosts")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<PostVM>> GetPosts()
-        {
-            var posts = await _db.Posts.ToListAsync();
-            var postsImages = await _db.Images.Where(u => u.PostId != null).Select(u => u.IndexImg + u.Extension).ToListAsync();
+        {           
+           var posts = await _db.Posts.ToListAsync();
+           var postImages = await _db.Images.ToListAsync();
 
-            PostVM postVM = new PostVM
-            {
-                Post = posts,
-                Image = postsImages
-            };
+           if (posts == null)
+               return BadRequest();        
 
-            return Ok(postVM);
-            //if(posts == null)
-            //    return NotFound();
+           List<PostVM> postVMList = new List<PostVM>();
+           foreach (var post in posts)
+           {
+                PostDTO postDTO = new PostDTO
+                {
+                    Description = post.Description,
+                    Header = post.Header,
+                    ShortDescription= post.ShortDescription,
+                };
+                var images = postImages.Where(u => u.PostId == post.Id).ToList();
+                PostVM postVM = new PostVM();
+                List<string> imagesList = new List<string>();
 
-            //List<PostVM> list = new List<PostVM>();
-            //foreach (var post in postsImages)
-            //{
-
-            //}
-
-
-
+                if (images != null)
+                {
+                    images.ForEach(img => { imagesList.Add(img.IndexImg + img.Extension); postVM.Image = imagesList; });
+                }       
+              
+              postVM.Post = postDTO;
+              postVMList.Add(postVM);
+           }                  
+           return Ok(postVMList);          
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> AddPost([FromForm]PostRM postRM)
         {
             if (postRM.Post == null)
@@ -56,7 +73,6 @@ namespace GrossAPI.Controllers
 
             Posts post = new Posts
             {
-                Id = Guid.NewGuid(),
                 ReleaseDate = DateTime.Now,
                 Description = postRM.Post.Description,
                 ShortDescription = postRM.Post.ShortDescription,
@@ -76,31 +92,15 @@ namespace GrossAPI.Controllers
 
             if (postRM.Image != null)
             {
-                for (int i = 0; i != postRM.Image.Images.Count; i++)
-                {
-                    string path = _webHostEnvironment.WebRootPath + WC.PathPostImage;
-                    string fileName = Guid.NewGuid().ToString();
-                    string extension = Path.GetExtension(postRM.Image.Images[i].FileName);
+                string path = _webHostEnvironment.WebRootPath + WC.PathPostImage;
+                var postId = _db.Posts.OrderByDescending(u => u.Id).FirstOrDefault().Id;
 
-                    using (var fileStream = new FileStream(Path.Combine(path, fileName + extension), FileMode.Create))
-                    {
-                        postRM.Image.Images[i].CopyTo(fileStream);
-                    }
-                    Images image = new Images
-                    {
-                        Id = Guid.NewGuid(),
-                        IndexImg = fileName,
-                        Extension = extension,
-                        PostId = _db.Posts.OrderByDescending(u => u.Id).FirstOrDefault().Id,
-                        ReportId = null
-                    };
-                    _db.Images.Add(image);
-                }
+                ImageHelper imageHelper = new ImageHelper(_db);
+                imageHelper.AddImages(postRM.Image, path, postId, null);
 
                 try
                 {
                     await _db.SaveChangesAsync();
-                    return Ok();
                 }
                 catch (Exception ex)
                 {
@@ -109,6 +109,94 @@ namespace GrossAPI.Controllers
             }
 
             return Ok(postRM);
+        }
+
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> DeletePost(int id)
+        {          
+            var post = await _db.Posts.FindAsync(id);
+            var postImages = await _db.Images.ToListAsync();
+
+            if (post == null || id <= 0) return BadRequest();
+
+            try
+            {
+                var images = await _db.Images.Where(u => u.PostId== post.Id).ToListAsync();
+                if(images != null)
+                {
+                    string upload = _webHostEnvironment.WebRootPath + WC.PathPostImage;
+                    ImageHelper imageHelper = new ImageHelper(_db);
+                    imageHelper.DeleteImages(upload, images);
+                }
+               
+                _db.Posts.Remove(post);
+                await _db.SaveChangesAsync();
+                return NoContent();
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> UpdatePost(int id, [FromForm] PostRM obj)
+        {
+            if(obj.Post == null|| id <= 0) return BadRequest();
+
+            var post = await _db.Posts.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+
+            if(obj.Image != null)
+            {
+                var postImages = await _db.Images.AsNoTracking().Where(u => u.PostId == post.Id).ToListAsync();
+                string path = _webHostEnvironment.WebRootPath + WC.PathPostImage;
+                ImageHelper imageHelper = new ImageHelper(_db);
+
+                if (postImages.Count > 0)
+                {
+                    imageHelper.DeleteImages(path, postImages);
+                }
+                imageHelper.AddImages(obj.Image, path, post.Id, null);
+                
+                try
+                {
+                    await _db.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+
+            if(post == null) return NotFound();
+
+            if (obj.Post.Description == null || obj.Post.Header == null || obj.Post.ShortDescription == null)
+            {
+                Reflection.ReloadProperties(post, obj.Post);
+            }
+            Posts postToDb = new Posts
+            {
+                Description = obj.Post.Description,
+                Header = obj.Post.Header,
+                ShortDescription = obj.Post.ShortDescription,
+                CreatedByUserId = post.CreatedByUserId,
+                Id = post.Id,
+                ReleaseDate = DateTime.Now
+            };         
+            try
+            {
+                _db.Posts.Update(postToDb);
+                await _db.SaveChangesAsync();
+            }
+            catch(Exception EX)
+            {
+                return BadRequest(EX.Message);
+            }           
+            return NoContent();
         }
     }
 }

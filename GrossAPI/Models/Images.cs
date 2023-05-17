@@ -10,8 +10,8 @@ namespace GrossAPI.Models
         public Guid Id { get; set; }
         public string IndexImg { get; set; }
         public string Extension { get; set; }
-        public Guid? PostId { get; set; }
-        public Guid? ReportId { get; set; }
+        public int? PostId { get; set; }
+        public int? ReportId { get; set; }
 
         [ForeignKey("PostId")]
         public virtual Posts Posts { get; set; }

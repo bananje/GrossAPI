@@ -4,6 +4,7 @@ using GrossAPI.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GrossAPI.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230515083625_ChangeStructureOfPost")]
+    partial class ChangeStructureOfPost
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,15 +93,13 @@ namespace GrossAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("PostId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("PostId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("ReportId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("ReportId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PostId");
 
                     b.HasIndex("ReportId");
 
@@ -137,11 +138,9 @@ namespace GrossAPI.Migrations
 
             modelBuilder.Entity("GrossAPI.Models.Posts", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CreatedByUserId")
                         .IsRequired()
@@ -155,6 +154,9 @@ namespace GrossAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("ImageId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("ReleaseDate")
                         .HasColumnType("datetime2");
 
@@ -167,16 +169,16 @@ namespace GrossAPI.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
+                    b.HasIndex("ImageId");
+
                     b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("GrossAPI.Models.Reports", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CreatedByUserId")
                         .IsRequired()
@@ -477,15 +479,9 @@ namespace GrossAPI.Migrations
 
             modelBuilder.Entity("GrossAPI.Models.Images", b =>
                 {
-                    b.HasOne("GrossAPI.Models.Posts", "Posts")
-                        .WithMany()
-                        .HasForeignKey("PostId");
-
                     b.HasOne("GrossAPI.Models.Reports", "Reports")
                         .WithMany()
                         .HasForeignKey("ReportId");
-
-                    b.Navigation("Posts");
 
                     b.Navigation("Reports");
                 });
@@ -525,7 +521,13 @@ namespace GrossAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("GrossAPI.Models.Images", "Images")
+                        .WithMany()
+                        .HasForeignKey("ImageId");
+
                     b.Navigation("ApplicationUser");
+
+                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("GrossAPI.Models.Reports", b =>

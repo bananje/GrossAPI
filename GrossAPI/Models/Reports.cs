@@ -6,7 +6,7 @@ namespace GrossAPI.Models
     public class Reports
     {
         [Key]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         [Required]
         public string Header { get; set; }
         [Required]

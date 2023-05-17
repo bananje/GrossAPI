@@ -6,7 +6,7 @@ namespace GrossAPI.Models
     public class Posts
     {
         [Key]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         [Required]
         public string Description { get; set; }
         [Required]
