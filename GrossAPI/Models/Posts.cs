@@ -21,6 +21,6 @@ namespace GrossAPI.Models
         public string CreatedByUserId { get; set; }
 
         [ForeignKey("CreatedByUserId")]
-        public virtual ApplicationUser ApplicationUser { get; set; }
+        public virtual Users ApplicationUser { get; set; }
     }
 }

@@ -1,5 +1,7 @@
 using GrossAPI.DataAccess;
 using GrossAPI.Models;
+using GrossAPI.Repository;
+using GrossAPI.Repository.IRepository;
 using GrossAPI.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +14,7 @@ builder.Services.AddDbContext<ApplicationDBContext>
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDBContext>();
 builder.Services.AddAutoMapper(typeof(AppMappingProfile));
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddControllers().AddNewtonsoftJson();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

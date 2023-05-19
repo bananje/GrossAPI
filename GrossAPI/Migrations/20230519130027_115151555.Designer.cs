@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GrossAPI.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20230515084411_NewIdForTables")]
-    partial class NewIdForTables
+    [Migration("20230519130027_115151555")]
+    partial class _115151555
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -242,6 +242,49 @@ namespace GrossAPI.Migrations
                     b.ToTable("Statuses");
                 });
 
+            modelBuilder.Entity("GrossAPI.Models.Users", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Patronymic")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TelNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -306,10 +349,6 @@ namespace GrossAPI.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -361,10 +400,6 @@ namespace GrossAPI.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -448,25 +483,6 @@ namespace GrossAPI.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("GrossAPI.Models.ApplicationUser", b =>
-                {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Patronymic")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Surname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasDiscriminator().HasValue("ApplicationUser");
-                });
-
             modelBuilder.Entity("GrossAPI.Models.FeedbackOrders", b =>
                 {
                     b.HasOne("GrossAPI.Models.Statuses", "Statuses")
@@ -495,7 +511,7 @@ namespace GrossAPI.Migrations
 
             modelBuilder.Entity("GrossAPI.Models.Orders", b =>
                 {
-                    b.HasOne("GrossAPI.Models.ApplicationUser", "ApplicationUser")
+                    b.HasOne("GrossAPI.Models.Users", "ApplicationUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -522,7 +538,7 @@ namespace GrossAPI.Migrations
 
             modelBuilder.Entity("GrossAPI.Models.Posts", b =>
                 {
-                    b.HasOne("GrossAPI.Models.ApplicationUser", "ApplicationUser")
+                    b.HasOne("GrossAPI.Models.Users", "ApplicationUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -533,7 +549,7 @@ namespace GrossAPI.Migrations
 
             modelBuilder.Entity("GrossAPI.Models.Reports", b =>
                 {
-                    b.HasOne("GrossAPI.Models.ApplicationUser", "ApplicationUser")
+                    b.HasOne("GrossAPI.Models.Users", "ApplicationUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
