@@ -29,11 +29,11 @@ namespace GrossAPI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegistrationRequestDTO model)
         {
-            //bool isUserNameUnique = _userRepo.IsUniqueUser(model.UserName);
-            //if (!isUserNameUnique)
-            //    return BadRequest();
-             
-            
+            bool isUserNameUnique = _userRepo.IsUniqueUser(model.UserName);
+            if (!isUserNameUnique)
+                return BadRequest();
+
+
             var user = await _userRepo.Register(model);
             if (user == null)
                 return BadRequest();

@@ -24,12 +24,16 @@ namespace GrossAPI.Repository
 
         public bool IsUniqueUser(string username)
         {
-            throw new NotImplementedException();
+            var user = _db.Users.Where(name => name.UserName == username).FirstOrDefault();
+            if(user == null)
+                return true;
+
+            return false;
         }      
 
         public async Task<LoginResponseDTO> Login(LoginRequestDTO obj)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.UserName.Contains(obj.UserName));
+            var user = await _db.Users.Where(u => u.UserName == obj.UserName).FirstOrDefaultAsync();
             LoginResponseDTO loginResponseDTO = new LoginResponseDTO();
 
             if (user == null)
@@ -67,33 +71,29 @@ namespace GrossAPI.Repository
 
         public async Task<Users> Register(RegistrationRequestDTO registrationRequestDTO)
         {
-            string id = Guid.NewGuid().ToString();
             Users user = new Users()
             {
-                UserId = id,
+                UserId = Guid.NewGuid().ToString(),
                 UserName = registrationRequestDTO.UserName,
                 PasswordHash = Crypter.HashPassword(registrationRequestDTO.Password),
                 Name = registrationRequestDTO.Name,
                 Surname = registrationRequestDTO.Surname,
                 Patronymic = registrationRequestDTO.Patronymic,
-                PhoneNumber = registrationRequestDTO.PhoneNumber,
+                TelNumber= registrationRequestDTO.PhoneNumber,
                 Email = registrationRequestDTO.Email,
-                TelNumber = registrationRequestDTO.TelNumber
             };
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
 
-            //UserRoles userRole = new UserRoles()
-            //{
-            //    UserId = user.Id,
-            //    RoleId = WC.UserRoleID
-            //};
-            //_db.UserRoles.Add(userRole);
-
+            UserRoles userRoles = new UserRoles()
+            {
+                UserId = user.UserId,
+                RoleId = WC.CustomerRoleId
+            };
+            _db.UserRoles.Add(userRoles);
             await _db.SaveChangesAsync();
-            return user;
-        }
-
-        
+            
+            return user;           
+        }       
     }
 }

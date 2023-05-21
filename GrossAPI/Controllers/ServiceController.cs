@@ -3,6 +3,7 @@ using GrossAPI.DataAccess;
 using GrossAPI.Models;
 using GrossAPI.Models.DTOModel;
 using GrossAPI.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -21,21 +22,8 @@ namespace GrossAPI.Controllers
             _db = db;
         }
 
-        //[HttpGet("services")]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //public async Task<ActionResult<List<ServicesDTO>>> GetServices(string? searchString, bool ascending, ServicesDTO servicesDTO)
-        //{
-        //    var servicesList = await _db.Services.ToListAsync();
-        //    if (servicesList.Count <= 0 || servicesList == null)
-        //        return NotFound();
-
-        //    if (searchString != null || searchString != "")
-        //    {
-        //        var filteredServices = _db.Services.Where(val => val.));
-        //    }
-        //}
-
-        [HttpGet("GetAll")]
+        [Authorize]
+        [HttpGet("services")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult GetAll()
@@ -56,6 +44,67 @@ namespace GrossAPI.Controllers
                 };
                 servicesList.Add(servicesDTO);
             }
+            return Ok(servicesList);
+        }
+
+        [HttpGet("search")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> SearchServices(string searchString)
+        {
+            var service = await _db.Services.Where(search => search.Title.StartsWith(searchString.ToLower())).ToListAsync();
+            if (service == null)
+                return NotFound();
+
+            return Ok(service);
+        }
+
+        [HttpGet("filter")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> FilterServices(string criteria, bool ascending)
+        {
+            if (criteria == null || criteria == "" || criteria.Length == 0)
+                return BadRequest();
+
+            string value = criteria.ToLower();
+            if (value == "category")
+            {
+                var filteredByCategory = ascending ? _db.Services.Include(u => u.Categories).OrderBy(filter => filter.Title)
+                                                   : _db.Services.Include(u => u.Categories).OrderByDescending(filter => filter.Title);
+                return Ok(filteredByCategory);
+            }
+
+            List<Services> servicesList = new List<Services>();
+            switch (value)
+            {
+                case "title":
+                    if (!ascending)
+                    {
+                        servicesList = _db.Services.OrderByDescending(filter => filter.Title).ToList();
+                    }
+                    else
+                    {
+                        servicesList = _db.Services.OrderBy(filter => filter.Title).ToList();
+                    }
+                    break;
+
+                case "price":
+                    if (!ascending)
+                    {
+                        servicesList = _db.Services.OrderByDescending(filter => filter.Price).ToList();
+                    }
+                    else
+                    {
+                        servicesList = _db.Services.OrderBy(filter => filter.Price).ToList();
+                    }
+                    break;
+
+                default:
+                    return NotFound();
+            }
+
             return Ok(servicesList);
         }
 
@@ -133,39 +182,5 @@ namespace GrossAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
-        //public static object GetPropertyValue(object obj, string propertyName)
-        //{
-        //    return obj.GetType().GetProperty(propertyName).GetValue(obj, null);
-        //}
-
-        //[HttpGet("search")]
-        //public async Task<ActionResult<ServicesDTO>> GetByTitle(bool ascending, string? sortValue, string? title)
-        //{
-        //    var filteredServices = _db.Services.Where(service =>
-        //    (string.IsNullOrEmpty(title) || service.Title.StartsWith(title)));
-
-        //    if (filteredServices == null)
-        //        return NotFound();
-
-        //    //ServicesDTO servicesDTO = new ServicesDTO();
-        //    //Type type = servicesDTO.GetType();
-        //    //PropertyInfo property = type.GetProperty(sortValue);
-
-
-        //    ////property.SetValue(servicesDTO, sortValue);
-        //    ////var propValue = property.GetValue(servicesDTO);
-        //    var sortedServices = ascending ? filteredServices.OrderBy(value => value.Title) :
-        //        filteredServices.OrderByDescending(value => value.Price);
-
-        //    var services = sortedServices.Select(service => new ServicesDTO()
-        //    {
-        //        Id = service.Id,
-        //        Title = service.Title,
-        //        Price = service.Price
-        //    });
-
-        //    return Ok(services);
-        //}
     }
 }
