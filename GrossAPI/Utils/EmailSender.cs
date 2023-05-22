@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using MimeKit;
+using System.Web;
 
 namespace GrossAPI.Utils
 {
@@ -15,7 +16,7 @@ namespace GrossAPI.Utils
 
         public Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            return Execute();
+            return Execute(email, subject, htmlMessage);
         }
 
         public async Task Execute(string email, string subject, string htmlMessage)
@@ -26,23 +27,23 @@ namespace GrossAPI.Utils
 
                 MimeMessage message = new MimeMessage();
 
-                message.From.Add(new MailboxAddress("Бухгалтерия Гросс", _emailSettings.Login)); //отправитель сообщения
-                message.To.Add(new MailboxAddress("Client", email)); //адресат сообщения
-                message.Subject = subject; //тема сообщения
+                message.From.Add(new MailboxAddress("Бухгалтерия Гросс", _emailSettings.Login)); 
+                message.To.Add(new MailboxAddress("Client", email));
+                message.Subject = subject; 
                 message.Body = new BodyBuilder { HtmlBody = htmlMessage }.ToMessageBody();
 
                 using (MailKit.Net.Smtp.SmtpClient client = new MailKit.Net.Smtp.SmtpClient())
                 {
-                    client.Connect("smtp.gmail.com", 465, true); //либо использум порт 465
-                    client.Authenticate(_emailSettings.Login, _emailSettings.Password); //логин-пароль от аккаунта
-                    client.Send(message);
-                    client.Disconnect(true);
+                   await client.ConnectAsync("smtp.gmail.com", 465, true); //либо порт 465
+                   await client.AuthenticateAsync(_emailSettings.Login, _emailSettings.Password); 
+                   await client.SendAsync(message);
+                   await client.DisconnectAsync(true);
                 }
             }
             catch (Exception ex)
             {
 
             }
-        }
+        }      
     }
 }

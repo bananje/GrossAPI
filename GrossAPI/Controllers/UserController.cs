@@ -1,7 +1,10 @@
 ﻿using GrossAPI.Models;
 using GrossAPI.Models.DTOModel;
 using GrossAPI.Repository.IRepository;
+using GrossAPI.Utils;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Web;
 
 namespace GrossAPI.Controllers
 {
@@ -10,10 +13,14 @@ namespace GrossAPI.Controllers
     public class UserController : Controller
     {
         private readonly IUserRepository _userRepo;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IEmailSender _emailSender;
 
-        public UserController(IUserRepository userRepo)
+        public UserController(IUserRepository userRepo, IWebHostEnvironment webHostEnvironment, IEmailSender emailSender)
         {
             _userRepo = userRepo;
+            _webHostEnvironment = webHostEnvironment;
+            _emailSender = emailSender;
         }
 
         [HttpPost("login")]
@@ -37,6 +44,20 @@ namespace GrossAPI.Controllers
             var user = await _userRepo.Register(model);
             if (user == null)
                 return BadRequest();
+
+            var pathToForm = _webHostEnvironment.WebRootPath + Path.DirectorySeparatorChar.ToString() + "Forms"
+                                                             + Path.DirectorySeparatorChar.ToString() + "RegisterForm.html";
+            var subject = "Регистрация на сайте Бухгалтерии Гросс";
+            string htmlBody;
+            using (StreamReader sr = System.IO.File.OpenText(pathToForm))
+            {
+                htmlBody = sr.ReadToEnd();
+            }
+
+            string encodedVariable = HttpUtility.HtmlEncode((user.Name + " " + user.Patronymic).ToString());
+            string formattedHtml = string.Format(htmlBody, encodedVariable);
+
+            await _emailSender.SendEmailAsync(user.Email, subject, formattedHtml);
 
             return Ok();
         }

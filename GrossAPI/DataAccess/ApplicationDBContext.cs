@@ -21,11 +21,14 @@ namespace GrossAPI.DataAccess
         public DbSet<Services> Services { get; set; }
         public DbSet<Statuses> Statuses { get; set; }
         public DbSet<Users> Users { get; set; }
+        public DbSet<Responses> Responses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
             builder.Entity<Users>().HasNoDiscriminator().HasKey(p => p.UserId);
+
+            builder.Entity<Responses>().HasNoKey();
         }
     }
 }

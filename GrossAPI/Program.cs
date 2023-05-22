@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.Sign
                 .AddEntityFrameworkStores<ApplicationDBContext>();
 builder.Services.AddAutoMapper(typeof(AppMappingProfile));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IEmailSender, EmailSender>();    
 
 var key = builder.Configuration.GetValue<string>("ApiSettings:Secret");
 builder.Services.AddAuthentication(x =>
@@ -45,7 +47,7 @@ builder.Services.AddSwaggerGen(options =>
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "Description",
-        Name = "Authoeization",
+        Name = "Authorization",
         In = ParameterLocation.Header,
         Scheme = "Bearer"
     });
