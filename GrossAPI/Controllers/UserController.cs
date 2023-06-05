@@ -41,7 +41,7 @@ namespace GrossAPI.Controllers
                 return BadRequest();
 
 
-            var user = await _userRepo.Register(model);
+            var user = await _userRepo.Register(model, WC.CustomerRoleId);
             if (user == null)
                 return BadRequest();
 
@@ -59,6 +59,21 @@ namespace GrossAPI.Controllers
 
             await _emailSender.SendEmailAsync(user.Email, subject, formattedHtml);
 
+            return Ok();
+        }
+
+        
+        [HttpPost("registeradmin")]
+        public async Task<IActionResult> RegisterAdmin([FromBody] RegistrationRequestDTO model)
+        {
+            bool isUserNameUnique = _userRepo.IsUniqueUser(model.UserName);
+            if (!isUserNameUnique)
+                return BadRequest();
+
+            var user = await _userRepo.Register(model, WC.AdminRoleId);
+            if (user == null)
+                return BadRequest();
+         
             return Ok();
         }
     }

@@ -2,8 +2,11 @@
 {
     public class OrderDTO
     {
-        public Guid Id { get; set; }
         public DateTime OrderDate { get; set; }
-        public ResponseDTO ResponseDTO { get; set; }
+        public string Status { get; set; }
+        public string CreatedByUser { get; set; }
+        public string? FullName { get; set; }
+        public string? TelNumber{ get; set; }
+        public string? Email { get; set; }
     }
 }

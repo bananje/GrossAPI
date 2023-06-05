@@ -2,6 +2,7 @@
 using GrossAPI.DataAccess;
 using GrossAPI.Models;
 using GrossAPI.Models.DTOModel;
+using GrossAPI.Models.ViewModel;
 using GrossAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,25 +23,24 @@ namespace GrossAPI.Controllers
             _db = db;
         }
 
-        [Authorize]
         [HttpGet("services")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult GetAll()
         {
-            var services = _db.Services.ToList();
+            var services = _db.Services.Include(u => u.Categories).ToList();
 
             if (services == null)
                 return NotFound();
 
-            List<ServicesDTO> servicesList = new List<ServicesDTO>();
+            List<ServiceVM> servicesList = new List<ServiceVM>();
             foreach (var service in services)
             {
-                ServicesDTO servicesDTO = new ServicesDTO
+                ServiceVM servicesDTO = new ServiceVM
                 {
                     Title = service.Title,
                     Price = service.Price,
-                    CategoryId = service.CategoryID
+                    Category = service.Categories.Title
                 };
                 servicesList.Add(servicesDTO);
             }
@@ -52,11 +52,23 @@ namespace GrossAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> SearchServices(string searchString)
         {
-            var service = await _db.Services.Where(search => search.Title.StartsWith(searchString.ToLower())).ToListAsync();
-            if (service == null)
+            var services = await _db.Services.Where(search => search.Title.StartsWith(searchString.ToLower())).Include(u => u.Categories).ToListAsync();
+            if (services == null)
                 return NotFound();
 
-            return Ok(service);
+            List<ServiceVM> servicesList = new List<ServiceVM>();
+            foreach (var service in services)
+            {
+                ServiceVM servicesDTO = new ServiceVM
+                {
+                    Title = service.Title,
+                    Price = service.Price,
+                    Category = service.Categories.Title
+                };
+                servicesList.Add(servicesDTO);
+            }
+
+            return Ok(servicesList);
         }
 
         [HttpGet("filter")]
@@ -69,35 +81,47 @@ namespace GrossAPI.Controllers
                 return BadRequest();
 
             string value = criteria.ToLower();
+            List<Services> servicesList = new List<Services>();
+            List<ServiceVM> listView = new List<ServiceVM>();
+
             if (value == "category")
             {
                 var filteredByCategory = ascending ? _db.Services.Include(u => u.Categories).OrderBy(filter => filter.Title)
                                                    : _db.Services.Include(u => u.Categories).OrderByDescending(filter => filter.Title);
-                return Ok(filteredByCategory);
+                foreach (var item in filteredByCategory)
+                {
+                    ServiceVM services = new ServiceVM
+                    {
+                        Title = item.Title,
+                        Category = item.Categories.Title,
+                        Price = item.Price,
+                    };
+                    listView.Add(services);
+                }
+                return Ok(listView);
             }
 
-            List<Services> servicesList = new List<Services>();
             switch (value)
             {
                 case "title":
                     if (!ascending)
                     {
-                        servicesList = _db.Services.OrderByDescending(filter => filter.Title).ToList();
+                        servicesList = _db.Services.OrderByDescending(filter => filter.Title).Include(u => u.Categories).ToList();
                     }
                     else
                     {
-                        servicesList = _db.Services.OrderBy(filter => filter.Title).ToList();
+                        servicesList = _db.Services.OrderBy(filter => filter.Title).Include(u => u.Categories).ToList();
                     }
                     break;
 
                 case "price":
                     if (!ascending)
                     {
-                        servicesList = _db.Services.OrderByDescending(filter => filter.Price).ToList();
+                        servicesList = _db.Services.OrderByDescending(filter => filter.Price).Include(u => u.Categories).ToList();
                     }
                     else
                     {
-                        servicesList = _db.Services.OrderBy(filter => filter.Price).ToList();
+                        servicesList = _db.Services.OrderBy(filter => filter.Price).Include(u => u.Categories).ToList();
                     }
                     break;
 
@@ -105,9 +129,21 @@ namespace GrossAPI.Controllers
                     return NotFound();
             }
 
-            return Ok(servicesList);
+            foreach (var item in servicesList)
+            {
+                ServiceVM service = new ServiceVM
+                {
+                    Title = item.Title,
+                    Price = item.Price,
+                    Category = item.Categories.Title
+                };
+                listView.Add(service);
+            }
+
+            return Ok(listView);
         }
 
+        [Authorize(Roles = WC.AdminRoleId)]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -136,6 +172,7 @@ namespace GrossAPI.Controllers
             }
         }
 
+        [Authorize(Roles = WC.AdminRoleId)]
         [HttpPut("{id}", Name = "UpdateService")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -163,6 +200,7 @@ namespace GrossAPI.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = WC.AdminRoleId)]
         [HttpDelete("{id}", Name = "DeleteService")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]

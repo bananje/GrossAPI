@@ -2,9 +2,12 @@
 using GrossAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using GrossAPI.DataAccess;
+using Microsoft.AspNetCore.Authorization;
+using GrossAPI.Utils;
 
 namespace GrossAPI.Controllers
 {
+    [Authorize(Roles = WC.AdminRoleId)]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoryController : Controller
@@ -24,8 +27,17 @@ namespace GrossAPI.Controllers
 
             if (categories == null)
                 return NotFound();
-           
-            return Ok(categories);
+
+            List<CategoryDTO> categoryList = new List<CategoryDTO>();
+            foreach (var category in categories)
+            {
+                CategoryDTO categoryDTO = new CategoryDTO
+                {
+                    Title= category.Title,
+                };
+                categoryList.Add(categoryDTO);
+            }
+            return Ok(categoryList);
         }
 
         [HttpPost("categorycreate")]

@@ -5,6 +5,7 @@ using GrossAPI.Models.DTOModel;
 using GrossAPI.Models.RequestModel;
 using GrossAPI.Models.ViewModel;
 using GrossAPI.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -38,7 +39,6 @@ namespace GrossAPI.Controllers
 
            if (posts == null)
                return BadRequest();        
-
            List<PostVM> postVMList = new List<PostVM>();
            foreach (var post in posts)
            {
@@ -63,6 +63,7 @@ namespace GrossAPI.Controllers
            return Ok(postVMList);          
         }
 
+        [Authorize(Roles = WC.AdminRoleId)]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -77,7 +78,7 @@ namespace GrossAPI.Controllers
                 Description = postRM.Post.Description,
                 ShortDescription = postRM.Post.ShortDescription,
                 Header = postRM.Post.Header,
-                CreatedByUserId = "1",
+                CreatedByUserId = "13fc8d1d-bc70-4cea-ae75-87382c3ec5fc",
             };
 
             try
@@ -111,6 +112,7 @@ namespace GrossAPI.Controllers
             return Ok(postRM);
         }
 
+        [Authorize(Roles = WC.AdminRoleId)]
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -141,6 +143,7 @@ namespace GrossAPI.Controllers
             }
         }
 
+        [Authorize(Roles = WC.AdminRoleId)]
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

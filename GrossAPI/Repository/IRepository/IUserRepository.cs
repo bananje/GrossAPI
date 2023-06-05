@@ -7,6 +7,6 @@ namespace GrossAPI.Repository.IRepository
     {
         bool IsUniqueUser(string username);
         Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO);
-        Task<Users> Register(RegistrationRequestDTO registrationRequestDTO);
+        Task<Users> Register(RegistrationRequestDTO registrationRequestDTO, string roleId);
     }
 }

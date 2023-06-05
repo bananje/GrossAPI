@@ -8,6 +8,7 @@ using GrossAPI.Models.ViewModel;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using static System.Net.Mime.MediaTypeNames;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GrossAPI.Controllers
 {
@@ -59,6 +60,7 @@ namespace GrossAPI.Controllers
             return Ok(reportVMList);
         }
 
+        [Authorize(Roles = WC.AdminRoleId)]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -105,6 +107,7 @@ namespace GrossAPI.Controllers
             return Ok(reportRM);
         }
 
+        [Authorize(Roles = WC.AdminRoleId)]
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -135,6 +138,7 @@ namespace GrossAPI.Controllers
             }
         }
 
+        [Authorize(Roles = WC.AdminRoleId)]
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

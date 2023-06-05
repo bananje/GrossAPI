@@ -17,9 +17,6 @@ namespace GrossAPI.Models
         public string Email { get; set; }
         [Phone]
         public string TelNumber { get; set; }
-        public Guid StatusID { get; set; }
-
-        [ForeignKey("StatusId")]
-        public virtual Statuses Statuses { get; set; }
+        public string Status { get; set; }
     }
 }

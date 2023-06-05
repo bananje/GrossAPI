@@ -25,11 +25,11 @@ namespace GrossAPI.Repository
         public bool IsUniqueUser(string username)
         {
             var user = _db.Users.Where(name => name.UserName == username).FirstOrDefault();
-            if(user == null)
+            if (user == null)
                 return true;
 
             return false;
-        }      
+        }
 
         public async Task<LoginResponseDTO> Login(LoginRequestDTO obj)
         {
@@ -69,7 +69,7 @@ namespace GrossAPI.Repository
             return loginResponseDTO;
         }
 
-        public async Task<Users> Register(RegistrationRequestDTO registrationRequestDTO)
+        public async Task<Users> Register(RegistrationRequestDTO registrationRequestDTO, string roleId)
         {
             Users user = new Users()
             {
@@ -79,7 +79,7 @@ namespace GrossAPI.Repository
                 Name = registrationRequestDTO.Name,
                 Surname = registrationRequestDTO.Surname,
                 Patronymic = registrationRequestDTO.Patronymic,
-                TelNumber= registrationRequestDTO.PhoneNumber,
+                TelNumber = registrationRequestDTO.PhoneNumber,
                 Email = registrationRequestDTO.Email,
             };
             _db.Users.Add(user);
@@ -88,12 +88,12 @@ namespace GrossAPI.Repository
             UserRoles userRoles = new UserRoles()
             {
                 UserId = user.UserId,
-                RoleId = WC.CustomerRoleId
+                RoleId = roleId
             };
             _db.UserRoles.Add(userRoles);
             await _db.SaveChangesAsync();
-            
-            return user;           
-        }       
+
+            return user;
+        }
     }
 }

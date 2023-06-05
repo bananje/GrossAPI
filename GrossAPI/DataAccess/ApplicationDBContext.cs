@@ -27,8 +27,6 @@ namespace GrossAPI.DataAccess
         {
             base.OnModelCreating(builder);
             builder.Entity<Users>().HasNoDiscriminator().HasKey(p => p.UserId);
-
-            builder.Entity<Responses>().HasNoKey();
         }
     }
 }
