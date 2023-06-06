@@ -18,5 +18,7 @@ namespace GrossAPI.Models
 
         [ForeignKey("CreatedByUserId")]
         public virtual Users ApplicationUser { get; set; }
+
+        public List<Services> Services { get; set; }
     }
 }

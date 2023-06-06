@@ -15,5 +15,7 @@ namespace GrossAPI.Models
 
         [ForeignKey("CategoryID")]
         public virtual Categories Categories { get; set; }
+
+        public List<Orders> Orders { get; set; }
     }
 }
