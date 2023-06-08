@@ -31,7 +31,7 @@ namespace GrossAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> GetOrders()
         {
-            var orders = await _db.Orders.Include(p=>p.ApplicationUser).ToListAsync();
+            var orders = await _db.Orders.Include(p=>p.Services).Include(p=>p.ApplicationUser).ToListAsync();
             if (orders == null)
             {
                 return NotFound();
