@@ -11,6 +11,8 @@ using System.Security.Claims;
 
 namespace GrossAPI.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class FeedbackOrdersController : Controller
     {
         private readonly ApplicationDBContext _db;
@@ -55,7 +57,7 @@ namespace GrossAPI.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = WC.AdminRoleId)]
+        
         [HttpGet("fborders")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -65,10 +67,10 @@ namespace GrossAPI.Controllers
             if (fbOrders.Count == 0 || fbOrders == null)
                 return NotFound();
 
-            List<FeedbackOrdersDTO> orders = new List<FeedbackOrdersDTO>();
+            List<FeedBackOrdersVM> orders = new List<FeedBackOrdersVM>();
             foreach (var fbOrder in fbOrders)
             {
-                FeedbackOrdersDTO feedbackOrdersDTO = new FeedbackOrdersDTO()
+                FeedBackOrdersVM feedbackOrdersDTO = new FeedBackOrdersVM()
                 {
                     Email = fbOrder.Email,
                     FullName = fbOrder.Surname + " " + fbOrder.Name + " " + fbOrder.Patronymic,

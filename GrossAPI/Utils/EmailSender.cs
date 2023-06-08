@@ -1,11 +1,12 @@
-﻿using Azure.Core;
+﻿
+using Castle.Core.Smtp;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using MimeKit;
 using System.Web;
 
 namespace GrossAPI.Utils
 {
-    public class EmailSender : IEmailSender
+    public class EmailSender : Microsoft.AspNetCore.Identity.UI.Services.IEmailSender
     {
         private readonly IConfiguration _configuration;
         public EmailSettings _emailSettings { get; set; }

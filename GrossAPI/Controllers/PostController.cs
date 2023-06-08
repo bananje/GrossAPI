@@ -29,6 +29,7 @@ namespace GrossAPI.Controllers
            _webHostEnvironment= webHostEnvironment;
         }
 
+        
         [HttpGet("posts", Name = "GetPosts")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -47,6 +48,7 @@ namespace GrossAPI.Controllers
                     Description = post.Description,
                     Header = post.Header,
                     ShortDescription= post.ShortDescription,
+                    ReleaseDate = post.ReleaseDate.ToString()
                 };
                 var images = postImages.Where(u => u.PostId == post.Id).ToList();
                 PostVM postVM = new PostVM();
@@ -54,7 +56,7 @@ namespace GrossAPI.Controllers
 
                 if (images != null)
                 {
-                    images.ForEach(img => { imagesList.Add(img.IndexImg + img.Extension); postVM.Image = imagesList; });
+                    images.ForEach(img => {imagesList.Add(_webHostEnvironment.WebRootPath + WC.PathPostImage +  img.IndexImg + img.Extension); postVM.Image = imagesList; });
                 }       
               
               postVM.Post = postDTO;

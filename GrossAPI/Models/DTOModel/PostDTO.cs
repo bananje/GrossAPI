@@ -8,6 +8,7 @@ namespace GrossAPI.Models.DTOModel
         [MaxLength(100)]
         public string? ShortDescription { get; set; }
         public string? Header { get; set; }
+        public string? ReleaseDate { get; set; }
 
     }
 }
