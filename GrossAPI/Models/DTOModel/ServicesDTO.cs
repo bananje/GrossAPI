@@ -5,6 +5,7 @@ namespace GrossAPI.Models.DTOModel
 {
     public class ServicesDTO
     {
+        public Guid Id { get; set; }
         public string Title { get; set; }
         [Range(1, int.MaxValue)]
         public decimal Price { get; set; }      

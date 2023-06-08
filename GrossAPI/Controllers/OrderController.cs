@@ -82,17 +82,13 @@ namespace GrossAPI.Controllers
             List<Services> servicesToDb = new List<Services>();
             foreach (var service in orderVM.Services)
             {
-                Services services = new Services
-                {
-                    Title = service.Title,
-                    Price = service.Price,
-                    CategoryID = service.CategoryId
-                };
-                servicesToDb.Add(services);
+                var serviceToDb = await _db.Services.FindAsync(service.Id);
+                servicesToDb.Add(serviceToDb);
             }
 
             Orders orderToDb = new Orders
             {
+                OrdersId = Guid.NewGuid(),
                 OrderDate = orderVM.Order.OrderDate,
                 //StatusId = orderVM.Order.Status,
                 CreatedByUserId = orderVM.Order.CreatedByUser,

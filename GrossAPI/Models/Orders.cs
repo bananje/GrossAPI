@@ -6,7 +6,7 @@ namespace GrossAPI.Models
     public class Orders
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid OrdersId { get; set; }
         [Required]
         public DateTime OrderDate { get; set; }
         public Guid StatusId { get; set; }
