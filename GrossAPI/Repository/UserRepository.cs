@@ -71,6 +71,10 @@ namespace GrossAPI.Repository
 
         public async Task<Users> Register(RegistrationRequestDTO registrationRequestDTO, string roleId)
         {
+            if (registrationRequestDTO.Email == null || registrationRequestDTO.Password == null
+                || registrationRequestDTO.UserName == null || registrationRequestDTO.PhoneNumber == null)
+                return null;
+
             Users user = new Users()
             {
                 UserId = Guid.NewGuid().ToString(),

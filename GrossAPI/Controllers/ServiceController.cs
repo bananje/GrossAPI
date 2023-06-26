@@ -38,6 +38,7 @@ namespace GrossAPI.Controllers
             {
                 ServiceVM servicesDTO = new ServiceVM
                 {
+                    Id = service.Id.ToString(),
                     Title = service.Title,
                     Price = service.Price,
                     Category = service.Categories.Title
@@ -144,7 +145,7 @@ namespace GrossAPI.Controllers
         }
 
         [Authorize(Roles = WC.AdminRoleId)]
-        [HttpPost]
+        [HttpPost("addservice")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<ServicesDTO>> CreateService(ServicesDTO obj)
@@ -200,8 +201,9 @@ namespace GrossAPI.Controllers
             return NoContent();
         }
 
+
         [Authorize(Roles = WC.AdminRoleId)]
-        [HttpDelete("{id}", Name = "DeleteService")]
+        [HttpDelete("deleteservice/{id}", Name = "DeleteService")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<ServicesDTO>> DeleteService(Guid id)

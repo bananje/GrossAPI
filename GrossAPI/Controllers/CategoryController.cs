@@ -28,16 +28,16 @@ namespace GrossAPI.Controllers
             if (categories == null)
                 return NotFound();
 
-            List<CategoryDTO> categoryList = new List<CategoryDTO>();
-            foreach (var category in categories)
-            {
-                CategoryDTO categoryDTO = new CategoryDTO
-                {
-                    Title= category.Title,
-                };
-                categoryList.Add(categoryDTO);
-            }
-            return Ok(categoryList);
+            //List<CategoryDTO> categoryList = new List<CategoryDTO>();
+            //foreach (var category in categories)
+            //{
+            //    CategoryDTO categoryDTO = new CategoryDTO
+            //    {
+            //        Title= category.Title,
+            //    };
+            //    categoryList.Add(categoryDTO);
+            //}
+            return Ok(categories);
         }
 
         [HttpPost("categorycreate")]
@@ -90,7 +90,7 @@ namespace GrossAPI.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}", Name = "DeleteCategory")]
+        [HttpDelete("deletecategory/{id}", Name = "DeleteCategory")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<CategoryDTO>> DeleteCategory(Guid id)

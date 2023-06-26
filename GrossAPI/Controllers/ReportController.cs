@@ -61,7 +61,7 @@ namespace GrossAPI.Controllers
         }
 
         [Authorize(Roles = WC.AdminRoleId)]
-        [HttpPost]
+        [HttpPost("addreport")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> AddReport([FromForm] ReportRM reportRM)

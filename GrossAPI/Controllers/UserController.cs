@@ -36,6 +36,10 @@ namespace GrossAPI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegistrationRequestDTO model)
         {
+            if (model.UserName == "" || model.PhoneNumber == "" || model.Email == ""
+               || model.Password == "")
+                return NotFound();
+
             bool isUserNameUnique = _userRepo.IsUniqueUser(model.UserName);
             if (!isUserNameUnique)
                 return BadRequest();
@@ -43,7 +47,7 @@ namespace GrossAPI.Controllers
 
             var user = await _userRepo.Register(model, WC.CustomerRoleId);
             if (user == null)
-                return BadRequest();
+                return NotFound();
 
             var pathToForm = _webHostEnvironment.WebRootPath + Path.DirectorySeparatorChar.ToString() + "Forms"
                                                              + Path.DirectorySeparatorChar.ToString() + "RegisterForm.html";

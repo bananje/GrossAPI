@@ -66,7 +66,7 @@ namespace GrossAPI.Controllers
         }
 
         [Authorize(Roles = WC.AdminRoleId)]
-        [HttpPost]
+        [HttpPost("addpost")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> AddPost([FromForm]PostRM postRM)
